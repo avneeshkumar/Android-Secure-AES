@@ -24,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
     Button decryptButton;
     String text;
     String key;
+    String ciphertext;
+    String saltstring;
+    String ivstring;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +44,9 @@ public class MainActivity extends AppCompatActivity {
                 SecureRandom random = new SecureRandom();
                 byte iv[] = new byte[16];//generate random 16 byte IV AES is always 16bytes
                 random.nextBytes(iv);
-                String ivstring = Base64.encodeToString(iv,Base64.DEFAULT);
+                ivstring = Base64.encodeToString(iv,Base64.DEFAULT);
                 random.nextBytes(iv);
-                String saltstring = Base64.encodeToString(iv,Base64.DEFAULT);
+                saltstring = Base64.encodeToString(iv,Base64.DEFAULT);
                 System.out.println(ivstring);
                 System.out.println(saltstring);
                 MessageDigest md = null;
@@ -59,10 +62,33 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                String cipher = Encryptor.encrypt(Base64.encodeToString(keybytes,Base64.DEFAULT),ivstring,text);
+                ciphertext = Encryptor.encrypt(Base64.encodeToString(keybytes,Base64.DEFAULT),ivstring,text);
 
-                Toast.makeText(MainActivity.this,cipher,Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this,ciphertext,Toast.LENGTH_LONG).show();
 
+
+            }
+        });
+
+        decryptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MessageDigest md = null;
+                byte[] keybytes=null;
+                try {
+                    md = MessageDigest.getInstance("SHA-1");
+                    keybytes = (key+saltstring).getBytes("UTF-8");
+                    keybytes = md.digest(keybytes);
+                    keybytes = Arrays.copyOf(keybytes, 16); // use only first 128 bit
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+                String originalText = Encryptor.decrypt(Base64.encodeToString(keybytes,Base64.DEFAULT),ivstring,ciphertext);
+
+                Toast.makeText(MainActivity.this,originalText,Toast.LENGTH_LONG).show();
 
             }
         });

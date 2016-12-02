@@ -32,8 +32,8 @@ public class Encryptor {
     }
     public static String decrypt(String key, String initVector, String encrypted) {
         try {
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+            IvParameterSpec iv = new IvParameterSpec((Base64.decode(initVector,Base64.DEFAULT)));
+            SecretKeySpec skeySpec = new SecretKeySpec((Base64.decode(key,Base64.DEFAULT)), "AES");
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
